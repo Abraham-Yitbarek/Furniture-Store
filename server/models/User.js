@@ -12,8 +12,6 @@ const User = {
     isAdmin = false,
     address = {},
   }) {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     const query = `
       INSERT INTO users (
         name,
@@ -53,7 +51,7 @@ const User = {
     const values = [
       name.trim(),
       email.toLowerCase().trim(),
-      hashedPassword,
+      password,
       isAdmin,
       address.fullName || null,
       address.line1 || null,

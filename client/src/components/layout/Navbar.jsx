@@ -9,8 +9,8 @@ const Navbar = () => {
 
   // Get logged-in user
   const storedUser = localStorage.getItem("fernwood_user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
-
+  const authData = storedUser ? JSON.parse(storedUser) : null;
+  const user = authData?.user || null;
   // Example cart count.
   // Later this will come from CartContext.
   const cartCount = 0;
