@@ -5,6 +5,9 @@ import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import Loader from "../components/common/Loader";
 import ErrorMessage from "../components/common/ErrorMessage";
+import PageHero from "../components/common/PageHero";
+
+import { pageHeroImages } from "../data/pageHeroImages";
 
 import {
   getCustomerProfile,
@@ -539,23 +542,12 @@ const Profile = () => {
 
   return (
     <main className="min-h-screen bg-[#F8F5EF]">
-      {/* Header */}
-      <section className="border-b border-gray-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <p className="mb-2 text-sm font-medium uppercase tracking-wider text-[#33473B]">
-            My Account
-          </p>
-
-          <h1 className="text-3xl font-bold text-[#031008] sm:text-4xl">
-            Profile
-          </h1>
-
-          <p className="mt-2 text-gray-600">
-            Manage your personal information, addresses,
-            and account security.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        kicker="My Account"
+        title="Profile"
+        subtitle="Manage your personal information, addresses, and account security."
+        image={pageHeroImages.profile}
+      />
 
       <section className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         {error && (

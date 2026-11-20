@@ -18,7 +18,7 @@ const ProductCard = ({ product, onAddToCart }) => {
   } = product;
 
   const productImage =
-    image_url || "https://via.placeholder.com/600x600?text=Fernwood";
+    image_url || "/images/products/harlow-sofa.jpg";
 
   const hasDiscount =
     discount_price !== null &&

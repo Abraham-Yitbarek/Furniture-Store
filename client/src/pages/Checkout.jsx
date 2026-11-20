@@ -5,6 +5,9 @@ import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import Loader from "../components/common/Loader";
 import ErrorMessage from "../components/common/ErrorMessage";
+import PageHero from "../components/common/PageHero";
+
+import { pageHeroImages } from "../data/pageHeroImages";
 
 import { createOrder } from "../services/orderApi";
 
@@ -351,22 +354,12 @@ const Checkout = () => {
 
   return (
     <main className="min-h-screen bg-[#F8F5EF]">
-      {/* Page header */}
-      <section className="border-b border-gray-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-sm font-medium uppercase tracking-wider text-[#33473B]">
-            Fernwood Furniture
-          </p>
-
-          <h1 className="mt-2 text-3xl font-bold text-[#031008] sm:text-4xl">
-            Checkout
-          </h1>
-
-          <p className="mt-2 text-gray-600">
-            Complete your information to place your order.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        kicker="Fernwood Furniture"
+        title="Checkout"
+        subtitle="Complete your information to place your order."
+        image={pageHeroImages.checkout}
+      />
 
       <form
         onSubmit={handlePlaceOrder}
@@ -637,7 +630,7 @@ const Checkout = () => {
                     item.image_url ||
                     item.image ||
                     item.product?.image_url ||
-                    "https://via.placeholder.com/100x100?text=Fernwood";
+                    "/images/products/harlow-sofa.jpg";
 
                   return (
                     <div

@@ -4,6 +4,9 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import Button from "../components/common/Button";
 import Loader from "../components/common/Loader";
 import ErrorMessage from "../components/common/ErrorMessage";
+import PageHero from "../components/common/PageHero";
+
+import { pageHeroImages } from "../data/pageHeroImages";
 
 import { getOrderById } from "../services/orderApi";
 
@@ -169,7 +172,7 @@ const OrderDetails = () => {
       product.image ||
       item.image_url ||
       item.image ||
-      "https://via.placeholder.com/160x160?text=Fernwood"
+      "/images/products/harlow-sofa.jpg"
     );
   };
 
@@ -320,39 +323,12 @@ const OrderDetails = () => {
 
   return (
     <main className="min-h-screen bg-[#F8F5EF]">
-      {/* Header */}
-      <section className="border-b border-gray-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <Link
-            to="/orders"
-            className="text-sm font-medium text-[#33473B] hover:underline"
-          >
-            ← Back to My Orders
-          </Link>
-
-          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-sm text-gray-500">
-                Order Details
-              </p>
-
-              <h1 className="mt-1 text-3xl font-bold text-[#031008]">
-                {getOrderNumber()}
-              </h1>
-
-              <p className="mt-2 text-sm text-gray-500">
-                Placed on {getOrderDate()}
-              </p>
-            </div>
-
-            <span
-              className={`inline-flex w-fit rounded-full px-4 py-2 text-sm font-semibold capitalize ${getStatusStyle()}`}
-            >
-              {String(getStatus()).replace(/_/g, " ")}
-            </span>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        kicker="Order Details"
+        title={getOrderNumber()}
+        subtitle={`Placed on ${getOrderDate()}`}
+        image={pageHeroImages.orders}
+      />
 
       {/* Main content */}
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

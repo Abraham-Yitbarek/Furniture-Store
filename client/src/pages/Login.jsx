@@ -4,6 +4,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import ErrorMessage from "../components/common/ErrorMessage";
+import PageHero from "../components/common/PageHero";
+
+import { pageHeroImages } from "../data/pageHeroImages";
 
 import { login } from "../services/authApi";
 
@@ -122,6 +125,13 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F5EF]">
+      <PageHero
+        kicker="Welcome back"
+        title="Sign in to your account"
+        subtitle="Access your orders, saved favorites, and a smoother shopping experience."
+        image={pageHeroImages.login}
+      />
+
       <div className="flex min-h-screen items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           {/* Brand */}

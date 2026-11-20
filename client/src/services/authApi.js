@@ -62,9 +62,7 @@ export const login = (data) => {
 |--------------------------------------------------------------------------
 */
 
-export const register = (data) => {
-  return api.post("/auth/register", data);
-};
+export const register = (data) => api.post("/auth/register", data);
 
 /*
 |--------------------------------------------------------------------------

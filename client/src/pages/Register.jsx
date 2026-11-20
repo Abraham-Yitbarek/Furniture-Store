@@ -4,6 +4,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import ErrorMessage from "../components/common/ErrorMessage";
+import PageHero from "../components/common/PageHero";
+
+import { pageHeroImages } from "../data/pageHeroImages";
 
 import { register } from "../services/authApi";
 
@@ -12,7 +15,7 @@ const Register = () => {
   const location = useLocation();
 
   const [formData, setFormData] = useState({
-    first_name: "",
+    name: "",
     last_name: "",
     email: "",
     phone: "",
@@ -53,7 +56,7 @@ const Register = () => {
     setError("");
 
     // Basic validation
-    if (!formData.first_name.trim()) {
+    if (!formData.name.trim()) {
       setError("Please enter your first name.");
       return;
     }
@@ -92,7 +95,7 @@ const Register = () => {
       setLoading(true);
 
       const response = await register({
-        first_name: formData.first_name.trim(),
+        name: formData.name.trim(),
         last_name: formData.last_name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
@@ -107,7 +110,7 @@ const Register = () => {
        *   token: "...",
        *   user: {
        *     id: 1,
-       *     first_name: "...",
+       *     name: "...",
        *     last_name: "...",
        *     email: "..."
        *   }
@@ -157,6 +160,13 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F5EF]">
+      <PageHero
+        kicker="Join Fernwood"
+        title="Create your account"
+        subtitle="Register today and enjoy furniture shopping tailored to your space and style."
+        image={pageHeroImages.register}
+      />
+
       <div className="flex min-h-screen items-center justify-center px-4 py-12">
         <div className="w-full max-w-lg">
           {/* Brand */}
@@ -196,9 +206,9 @@ const Register = () => {
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <Input
                   label="First name"
-                  name="first_name"
+                  name="name"
                   type="text"
-                  value={formData.first_name}
+                  value={formData.name}
                   placeholder="First name"
                   onChange={handleChange}
                   autoComplete="given-name"

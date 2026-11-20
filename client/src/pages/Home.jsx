@@ -150,7 +150,7 @@ const Home = () => {
       category.image_url ||
       category.image ||
       category.thumbnail ||
-      "https://via.placeholder.com/800x600?text=Furniture"
+      "/images/products/harlow-sofa.jpg"
     );
   };
 
@@ -232,7 +232,7 @@ const Home = () => {
           <div className="relative">
             <div className="overflow-hidden rounded-2xl">
               <img
-                src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1200&q=85"
+                src="/images/room-designs/living-room.jpg"
                 alt="Modern Fernwood furniture"
                 className="h-[420px] w-full object-cover sm:h-[500px]"
               />
@@ -427,7 +427,7 @@ const Home = () => {
               {/* Offer image */}
               <div className="h-full min-h-[320px]">
                 <img
-                  src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85"
+                  src="/images/room-designs/living-room.jpg"
                   alt="Elegant furniture interior"
                   className="h-full min-h-[320px] w-full object-cover"
                 />

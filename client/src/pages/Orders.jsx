@@ -4,6 +4,9 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/common/Button";
 import Loader from "../components/common/Loader";
 import ErrorMessage from "../components/common/ErrorMessage";
+import PageHero from "../components/common/PageHero";
+
+import { pageHeroImages } from "../data/pageHeroImages";
 
 import { getOrders } from "../services/orderApi";
 
@@ -219,33 +222,12 @@ const Orders = () => {
 
   return (
     <main className="min-h-screen bg-[#F8F5EF]">
-      {/* Header */}
-      <section className="border-b border-gray-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <p className="mb-2 text-sm font-medium uppercase tracking-wider text-[#33473B]">
-            Your purchases
-          </p>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-[#031008] sm:text-4xl">
-                My Orders
-              </h1>
-
-              <p className="mt-2 text-gray-600">
-                View your previous orders and track their status.
-              </p>
-            </div>
-
-            {orders.length > 0 && (
-              <p className="text-sm text-gray-500">
-                {orders.length}{" "}
-                {orders.length === 1 ? "order" : "orders"}
-              </p>
-            )}
-          </div>
-        </div>
-      </section>
+      <PageHero
+        kicker="Your purchases"
+        title="My Orders"
+        subtitle="View your previous orders and track their status."
+        image={pageHeroImages.orders}
+      />
 
       {/* Content */}
       <section className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -390,7 +372,7 @@ const Orders = () => {
                               product.image_url ||
                               product.image ||
                               item.image_url ||
-                              "https://via.placeholder.com/80x80?text=Fernwood";
+                              "/images/products/harlow-sofa.jpg";
 
                             const name =
                               product.name ||

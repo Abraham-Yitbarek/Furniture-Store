@@ -74,9 +74,9 @@ const Navbar = () => {
               Products
             </NavLink>
 
-            <NavLink to="/categories" className={navLinkClass}>
+            {/* <NavLink to="/categories" className={navLinkClass}>
               Categories
-            </NavLink>
+            </NavLink> */}
           </nav>
 
           {/* =========================
@@ -468,14 +468,6 @@ const Navbar = () => {
                 className="rounded-md px-3 py-2.5 text-sm font-medium text-[#031008] hover:bg-gray-100"
               >
                 Products
-              </Link>
-
-              <Link
-                to="/categories"
-                onClick={() => setIsMenuOpen(false)}
-                className="rounded-md px-3 py-2.5 text-sm font-medium text-[#031008] hover:bg-gray-100"
-              >
-                Categories
               </Link>
 
               <Link

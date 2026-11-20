@@ -6,6 +6,9 @@ import ProductGrid from "../components/product/ProductGrid";
 import Loader from "../components/common/Loader";
 import ErrorMessage from "../components/common/ErrorMessage";
 import Button from "../components/common/Button";
+import PageHero from "../components/common/PageHero";
+
+import { pageHeroImages } from "../data/pageHeroImages";
 
 import {
   getProducts,
@@ -646,25 +649,12 @@ const Products = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F5EF]">
-      {/* ==================================================
-          PAGE HEADER
-      ================================================== */}
-      <section className="bg-[#031008]">
-        <div className="mx-auto max-w-7xl px-6 py-14 sm:px-8 lg:px-12">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#C8B89A]">
-            Fernwood Furniture
-          </p>
-
-          <h1 className="mt-3 text-4xl font-bold text-white sm:text-5xl">
-            Furniture Collection
-          </h1>
-
-          <p className="mt-4 max-w-2xl text-base leading-7 text-gray-300">
-            Explore our complete collection of furniture
-            designed for comfort, functionality, and style.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        kicker="Fernwood Furniture"
+        title="Furniture Collection"
+        subtitle="Explore our complete collection of furniture designed for comfort, functionality, and style."
+        image={pageHeroImages.products}
+      />
 
       {/* ==================================================
           MAIN CONTENT

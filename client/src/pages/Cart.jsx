@@ -4,6 +4,9 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/common/Button";
 import Loader from "../components/common/Loader";
 import ErrorMessage from "../components/common/ErrorMessage";
+import PageHero from "../components/common/PageHero";
+
+import { pageHeroImages } from "../data/pageHeroImages";
 
 const CART_STORAGE_KEY = "fernwood_cart";
 
@@ -146,7 +149,7 @@ const Cart = () => {
       product.image_url ||
       product.image ||
       product.thumbnail ||
-      "https://via.placeholder.com/300x300?text=Furniture"
+      "/images/products/harlow-sofa.jpg"
     );
   };
 
@@ -472,23 +475,12 @@ const Cart = () => {
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-[#F8F5EF]">
-        {/* Header */}
-        <section className="bg-[#031008]">
-          <div className="mx-auto max-w-7xl px-6 py-14 sm:px-8 lg:px-12">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#C8B89A]">
-              Fernwood Furniture
-            </p>
-
-            <h1 className="mt-3 text-4xl font-bold text-white sm:text-5xl">
-              Your Cart
-            </h1>
-
-            <p className="mt-4 text-gray-300">
-              Review your selected furniture before
-              checkout.
-            </p>
-          </div>
-        </section>
+        <PageHero
+          kicker="Cart"
+          title="Your Cart"
+          subtitle="Review your selected furniture before checkout."
+          image={pageHeroImages.cart}
+        />
 
         {/* Empty state */}
         <main className="mx-auto flex min-h-[55vh] max-w-7xl items-center justify-center px-6 py-16 sm:px-8 lg:px-12">
@@ -646,7 +638,7 @@ const Cart = () => {
                           className="h-full w-full object-cover transition duration-300 hover:scale-105"
                           onError={(event) => {
                             event.currentTarget.src =
-                              "https://via.placeholder.com/300x300?text=Furniture";
+                              "/images/products/harlow-sofa.jpg";
                           }}
                         />
                       </Link>
