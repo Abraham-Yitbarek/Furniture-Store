@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
@@ -18,10 +19,9 @@ import {
   deleteCustomerAddress,
 } from "../services/customerApi";
 
-import { changePassword } from "../services/authApi";
-
 const Profile = () => {
   const navigate = useNavigate();
+  const { user, updateUser, changePassword } = useAuth();
 
   const [profile, setProfile] = useState(null);
   const [addresses, setAddresses] = useState([]);
@@ -31,11 +31,10 @@ const Profile = () => {
   const [savingPassword, setSavingPassword] = useState(false);
   const [savingAddress, setSavingAddress] = useState(false);
 
-  const [editingAddressId, setEditingAddressId] =
-    useState(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
 
-  const [showAddressForm, setShowAddressForm] =
-    useState(false);
+  const [editingAddressId, setEditingAddressId] = useState(null);
+  const [showAddressForm, setShowAddressForm] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -63,21 +62,44 @@ const Profile = () => {
   const [profileErrors, setProfileErrors] = useState({});
   const [passwordErrors, setPasswordErrors] = useState({});
   const [addressErrors, setAddressErrors] = useState({});
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
 
-  /*
-   * -------------------------------------------------------
-   * Authentication
-   * -------------------------------------------------------
-   */
+  // ============================================================
+  // Profile form helpers
+  // ============================================================
 
-  const storedUser = localStorage.getItem("fernwood_user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  const getProfileFormData = (profileData) => {
+    const fullName = profileData?.name?.trim() || "";
 
-  /*
-   * -------------------------------------------------------
-   * Load profile
-   * -------------------------------------------------------
-   */
+    const nameParts = fullName
+      ? fullName.split(/\s+/)
+      : [];
+
+    return {
+      firstName:
+        profileData?.first_name ||
+        profileData?.firstName ||
+        nameParts[0] ||
+        "",
+
+      lastName:
+        profileData?.last_name ||
+        profileData?.lastName ||
+        nameParts.slice(1).join(" ") ||
+        "",
+
+      email: profileData?.email || "",
+
+      phone:
+        profileData?.address_phone ||
+        profileData?.phone ||
+        "",
+    };
+  };
+
+  // ============================================================
+  // Load profile and addresses
+  // ============================================================
 
   useEffect(() => {
     if (!user) {
@@ -91,7 +113,7 @@ const Profile = () => {
     }
 
     loadProfile();
-  }, []);
+  }, [user, navigate]);
 
   const loadProfile = async () => {
     try {
@@ -120,18 +142,7 @@ const Profile = () => {
       setProfile(profileData);
       setAddresses(addressList);
 
-      setProfileForm({
-        firstName:
-          profileData?.first_name ||
-          profileData?.firstName ||
-          "",
-        lastName:
-          profileData?.last_name ||
-          profileData?.lastName ||
-          "",
-        email: profileData?.email || "",
-        phone: profileData?.phone || "",
-      });
+      setProfileForm(getProfileFormData(profileData));
     } catch (err) {
       console.error("Failed to load profile:", err);
 
@@ -144,11 +155,9 @@ const Profile = () => {
     }
   };
 
-  /*
-   * -------------------------------------------------------
-   * Profile form
-   * -------------------------------------------------------
-   */
+  // ============================================================
+  // Profile information
+  // ============================================================
 
   const handleProfileChange = (event) => {
     const { name, value } = event.target;
@@ -165,6 +174,21 @@ const Profile = () => {
 
     setError("");
     setSuccess("");
+  };
+
+  const handleEditProfile = () => {
+    setProfileForm(getProfileFormData(profile));
+    setProfileErrors({});
+    setError("");
+    setSuccess("");
+    setIsEditingProfile(true);
+  };
+
+  const handleCancelProfileEdit = () => {
+    setProfileForm(getProfileFormData(profile));
+    setProfileErrors({});
+    setIsEditingProfile(false);
+    setError("");
   };
 
   const validateProfile = () => {
@@ -186,9 +210,7 @@ const Profile = () => {
       errors.email = "Please enter a valid email.";
     }
 
-    if (!profileForm.phone.trim()) {
-      errors.phone = "Phone number is required.";
-    }
+    // Phone number is optional.
 
     setProfileErrors(errors);
 
@@ -211,7 +233,7 @@ const Profile = () => {
         first_name: profileForm.firstName.trim(),
         last_name: profileForm.lastName.trim(),
         email: profileForm.email.trim(),
-        phone: profileForm.phone.trim(),
+        phone: profileForm.phone.trim() || null,
       });
 
       const updatedProfile =
@@ -221,24 +243,12 @@ const Profile = () => {
 
       setProfile(updatedProfile);
 
-      /*
-       * Keep the local user information synchronized.
-       */
-      const currentUser = localStorage.getItem(
-        "fernwood_user"
-      );
+      setProfileForm(getProfileFormData(updatedProfile));
 
-      if (currentUser) {
-        const parsedUser = JSON.parse(currentUser);
+      // AuthContext handles localStorage synchronization.
+      updateUser(updatedProfile);
 
-        localStorage.setItem(
-          "fernwood_user",
-          JSON.stringify({
-            ...parsedUser,
-            ...updatedProfile,
-          })
-        );
-      }
+      setIsEditingProfile(false);
 
       setSuccess("Your profile has been updated.");
     } catch (err) {
@@ -253,11 +263,9 @@ const Profile = () => {
     }
   };
 
-  /*
-   * -------------------------------------------------------
-   * Password
-   * -------------------------------------------------------
-   */
+  // ============================================================
+  // Password management
+  // ============================================================
 
   const handlePasswordChange = (event) => {
     const { name, value } = event.target;
@@ -320,8 +328,7 @@ const Profile = () => {
       setSuccess("");
 
       await changePassword({
-        current_password:
-          passwordForm.currentPassword,
+        current_password: passwordForm.currentPassword,
         new_password: passwordForm.newPassword,
       });
 
@@ -332,6 +339,8 @@ const Profile = () => {
       });
 
       setSuccess("Your password has been changed.");
+      setIsEditingPassword(false); // Add this line
+
     } catch (err) {
       console.error("Failed to change password:", err);
 
@@ -344,11 +353,21 @@ const Profile = () => {
     }
   };
 
-  /*
-   * -------------------------------------------------------
-   * Address form
-   * -------------------------------------------------------
-   */
+  const handleCancelPasswordEdit = () => {
+  setPasswordForm({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  setPasswordErrors({});
+  setIsEditingPassword(false);
+  setError("");
+  };
+
+  // ============================================================
+  // Address management
+  // ============================================================
 
   const handleAddressChange = (event) => {
     const { name, value } = event.target;
@@ -438,8 +457,7 @@ const Profile = () => {
 
         setSuccess("Address updated successfully.");
       } else {
-        const response =
-          await addCustomerAddress(payload);
+        const response = await addCustomerAddress(payload);
 
         const newAddress =
           response.data?.address ||
@@ -516,11 +534,9 @@ const Profile = () => {
     }
   };
 
-  /*
-   * -------------------------------------------------------
-   * Loading
-   * -------------------------------------------------------
-   */
+  // ============================================================
+  // Loading states
+  // ============================================================
 
   if (!user) {
     return null;
@@ -534,11 +550,12 @@ const Profile = () => {
     );
   }
 
-  /*
-   * -------------------------------------------------------
-   * Page
-   * -------------------------------------------------------
-   */
+  const profileInitial =
+    profileForm.firstName?.charAt(0)?.toUpperCase() || "U";
+
+  // ============================================================
+  // Page UI
+  // ============================================================
 
   return (
     <main className="min-h-screen bg-[#F8F5EF]">
@@ -563,18 +580,48 @@ const Profile = () => {
         )}
 
         <div className="space-y-6">
-          {/* Profile information */}
-          <section className="rounded-lg bg-white p-6 shadow-sm">
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-[#031008]">
-                Profile Information
-              </h2>
+                
+        {/* Profile information */}
+        <section className="rounded-lg bg-white p-6 shadow-sm">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-[#031008]">
+              Profile Information
+            </h2>
 
-              <p className="mt-1 text-sm text-gray-500">
-                Update your personal information.
+            <p className="mt-1 text-sm text-gray-500">
+              {isEditingProfile
+                ? "Update your personal information."
+                : "View your personal account information."}
+            </p>
+          </div>
+
+          {/* Profile avatar and basic information */}
+          <div className="mb-7 flex items-center gap-4">
+            {profile?.profile_picture ? (
+              <img
+                src={profile.profile_picture}
+                alt="Profile"
+                className="h-20 w-20 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#33473B] text-2xl font-semibold text-white">
+                {profileInitial}
+              </div>
+            )}
+
+            <div>
+              <p className="font-medium text-[#031008]">
+                {profileForm.firstName} {profileForm.lastName}
+              </p>
+
+              <p className="text-sm text-gray-500">
+                {profileForm.email}
               </p>
             </div>
+          </div>
 
+          {/* Edit form - only visible when editing */}
+          {isEditingProfile && (
             <form onSubmit={handleProfileSubmit}>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <Input
@@ -606,26 +653,47 @@ const Profile = () => {
                 />
 
                 <Input
-                  label="Phone"
+                  label="Phone (Optional)"
                   name="phone"
                   type="tel"
                   value={profileForm.phone}
                   onChange={handleProfileChange}
                   error={profileErrors.phone}
-                  required
                 />
               </div>
 
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancelProfileEdit}
+                  disabled={savingProfile}
+                >
+                  Cancel
+                </Button>
+
                 <Button
                   type="submit"
                   loading={savingProfile}
                 >
-                  Update Profile
+                  Save Changes
                 </Button>
               </div>
             </form>
-          </section>
+          )}
+
+          {/* Update button - only visible in view mode */}
+          {!isEditingProfile && (
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                onClick={handleEditProfile}
+              >
+                Update Profile
+              </Button>
+            </div>
+          )}
+        </section>
 
           {/* Account information */}
           <section className="rounded-lg bg-white p-6 shadow-sm">
@@ -651,9 +719,7 @@ const Profile = () => {
 
                 <p className="mt-1 font-medium text-[#031008]">
                   {profile?.created_at
-                    ? new Date(
-                        profile.created_at
-                      ).toLocaleDateString()
+                    ? new Date(profile.created_at).toLocaleDateString()
                     : "—"}
                 </p>
               </div>
@@ -683,7 +749,6 @@ const Profile = () => {
               )}
             </div>
 
-            {/* Existing addresses */}
             {addresses.length > 0 && (
               <div className="mt-6 space-y-4">
                 {addresses.map((address) => (
@@ -704,14 +769,12 @@ const Profile = () => {
                         </p>
 
                         <p className="mt-1 text-sm text-gray-600">
-                          {address.city},{" "}
-                          {address.country}
+                          {address.city}, {address.country}
                         </p>
 
                         {address.postal_code && (
                           <p className="mt-1 text-sm text-gray-500">
-                            Postal Code:{" "}
-                            {address.postal_code}
+                            Postal Code: {address.postal_code}
                           </p>
                         )}
                       </div>
@@ -720,9 +783,7 @@ const Profile = () => {
                         <Button
                           variant="outline"
                           size="small"
-                          onClick={() =>
-                            handleEditAddress(address)
-                          }
+                          onClick={() => handleEditAddress(address)}
                         >
                           Edit
                         </Button>
@@ -730,9 +791,7 @@ const Profile = () => {
                         <Button
                           variant="danger"
                           size="small"
-                          onClick={() =>
-                            handleDeleteAddress(address.id)
-                          }
+                          onClick={() => handleDeleteAddress(address.id)}
                         >
                           Delete
                         </Button>
@@ -743,14 +802,13 @@ const Profile = () => {
               </div>
             )}
 
-            {addresses.length === 0 &&
-              !showAddressForm && (
-                <div className="mt-6 rounded-md bg-[#F8F5EF] px-5 py-8 text-center">
-                  <p className="text-sm text-gray-500">
-                    You don't have any saved addresses yet.
-                  </p>
-                </div>
-              )}
+            {addresses.length === 0 && !showAddressForm && (
+              <div className="mt-6 rounded-md bg-[#F8F5EF] px-5 py-8 text-center">
+                <p className="text-sm text-gray-500">
+                  You don't have any saved addresses yet.
+                </p>
+              </div>
+            )}
 
             {/* Address form */}
             {showAddressForm && (
@@ -834,57 +892,82 @@ const Profile = () => {
               </h2>
 
               <p className="mt-1 text-sm text-gray-500">
-                Update your password to keep your account
-                secure.
+                {isEditingPassword
+                  ? "Enter your current password and choose a new password."
+                  : "Keep your account secure by updating your password regularly."}
               </p>
             </div>
 
-            <form onSubmit={handlePasswordSubmit}>
-              <div className="space-y-5">
-                <Input
-                  label="Current Password"
-                  name="currentPassword"
-                  type="password"
-                  value={passwordForm.currentPassword}
-                  onChange={handlePasswordChange}
-                  error={passwordErrors.currentPassword}
-                  autoComplete="current-password"
-                  required
-                />
+            {isEditingPassword && (
+              <form onSubmit={handlePasswordSubmit}>
+                <div className="space-y-5">
+                  <Input
+                    label="Current Password"
+                    name="currentPassword"
+                    type="password"
+                    value={passwordForm.currentPassword}
+                    onChange={handlePasswordChange}
+                    error={passwordErrors.currentPassword}
+                    autoComplete="current-password"
+                    required
+                  />
 
-                <Input
-                  label="New Password"
-                  name="newPassword"
-                  type="password"
-                  value={passwordForm.newPassword}
-                  onChange={handlePasswordChange}
-                  error={passwordErrors.newPassword}
-                  autoComplete="new-password"
-                  required
-                />
+                  <Input
+                    label="New Password"
+                    name="newPassword"
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={handlePasswordChange}
+                    error={passwordErrors.newPassword}
+                    autoComplete="new-password"
+                    required
+                  />
 
-                <Input
-                  label="Confirm New Password"
-                  name="confirmPassword"
-                  type="password"
-                  value={passwordForm.confirmPassword}
-                  onChange={handlePasswordChange}
-                  error={passwordErrors.confirmPassword}
-                  autoComplete="new-password"
-                  required
-                />
-              </div>
+                  <Input
+                    label="Confirm New Password"
+                    name="confirmPassword"
+                    type="password"
+                    value={passwordForm.confirmPassword}
+                    onChange={handlePasswordChange}
+                    error={passwordErrors.confirmPassword}
+                    autoComplete="new-password"
+                    required
+                  />
+                </div>
 
-              <div className="mt-6 flex justify-end">
+                <div className="mt-6 flex justify-end gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancelPasswordEdit}
+                    disabled={savingPassword}
+                  >
+                    Cancel
+                  </Button>
+
+                  <Button type="submit" loading={savingPassword}>
+                    Save Changes
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {!isEditingPassword && (
+              <div className="flex justify-end">
                 <Button
-                  type="submit"
-                  loading={savingPassword}
+                  type="button"
+                  onClick={() => {
+                    setError("");
+                    setSuccess("");
+                    setIsEditingPassword(true);
+                  }}
                 >
-                  Change Password
+                  Update Password
                 </Button>
               </div>
-            </form>
+            )}
           </section>
+
         </div>
       </section>
     </main>

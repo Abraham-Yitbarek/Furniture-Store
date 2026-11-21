@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import Input from "../components/common/Input";
@@ -8,11 +8,13 @@ import PageHero from "../components/common/PageHero";
 
 import { pageHeroImages } from "../data/pageHeroImages";
 
-import { login } from "../services/authApi";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -23,17 +25,12 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // If the user was redirected to login from another page,
-  // remember where they wanted to go.
-  const redirectPath = location.state?.from || "/";
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("fernwood_user");
-
-    if (storedUser) {
-      navigate("/", { replace: true });
-    }
-  }, [navigate]);
+  /*
+   * If the user was redirected to login from a protected page,
+   * send them back to that page after successful authentication.
+   */
+  const redirectPath =
+    location.state?.from?.pathname || "/";
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -66,50 +63,24 @@ const Login = () => {
     try {
       setLoading(true);
 
-      const response = await login({
+      /*
+       * AuthContext handles:
+       * - API login
+       * - storing token + user
+       * - updating authentication state
+       * - notifying the application
+       */
+      await login({
         email: formData.email.trim(),
         password: formData.password,
       });
 
       /*
-       * Expected successful response:
+       * Return the user to the page they originally requested.
        *
-       * {
-       *   token: "...",
-       *   user: {
-       *     id: 1,
-       *     first_name: "...",
-       *     last_name: "...",
-       *     email: "..."
-       *   }
-       * }
-       *
-       * Some backends may return the user directly alongside the token.
+       * Example:
+       * /profile → /login → successful login → /profile
        */
-
-      const data = response.data;
-
-      const token = data.token;
-
-      const user = data.user || data;
-
-      if (!token) {
-        throw new Error("Authentication token was not returned by the server.");
-      }
-
-      const storedUser = {
-        token,
-        user,
-      };
-
-      localStorage.setItem(
-        "fernwood_user",
-        JSON.stringify(storedUser)
-      );
-
-      // Notify other parts of the application that authentication changed.
-      window.dispatchEvent(new Event("fernwood:auth-updated"));
-
       navigate(redirectPath, { replace: true });
     } catch (err) {
       const message =
@@ -134,6 +105,7 @@ const Login = () => {
 
       <div className="flex min-h-screen items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
+
           {/* Brand */}
           <div className="mb-8 text-center">
             <Link
@@ -150,6 +122,7 @@ const Login = () => {
 
           {/* Login Card */}
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+
             <div className="mb-6">
               <h1 className="text-2xl font-semibold text-[#031008]">
                 Sign in
@@ -167,6 +140,7 @@ const Login = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
+
               {/* Email */}
               <Input
                 label="Email address"

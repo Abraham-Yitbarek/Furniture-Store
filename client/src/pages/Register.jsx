@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
@@ -7,15 +11,16 @@ import ErrorMessage from "../components/common/ErrorMessage";
 import PageHero from "../components/common/PageHero";
 
 import { pageHeroImages } from "../data/pageHeroImages";
-
-import { register } from "../services/authApi";
+import { useAuth } from "../context/AuthContext";
 
 const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const { register, isAuthenticated, loading: authLoading } = useAuth();
+
   const [formData, setFormData] = useState({
-    name: "",
+    first_name: "",
     last_name: "",
     email: "",
     phone: "",
@@ -29,14 +34,18 @@ const Register = () => {
   // Return the customer to the page they originally wanted.
   const redirectPath = location.state?.from || "/";
 
+  // ============================================================
+  // REDIRECT AUTHENTICATED USERS
+  // ============================================================
   useEffect(() => {
-    const storedUser = localStorage.getItem("fernwood_user");
-
-    if (storedUser) {
+    if (!authLoading && isAuthenticated) {
       navigate("/", { replace: true });
     }
-  }, [navigate]);
+  }, [authLoading, isAuthenticated, navigate]);
 
+  // ============================================================
+  // HANDLE INPUT CHANGES
+  // ============================================================
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -50,13 +59,18 @@ const Register = () => {
     }
   };
 
+  // ============================================================
+  // HANDLE REGISTRATION
+  // ============================================================
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     setError("");
 
-    // Basic validation
-    if (!formData.name.trim()) {
+    // ----------------------------------------------------------
+    // Validation
+    // ----------------------------------------------------------
+    if (!formData.first_name.trim()) {
       setError("Please enter your first name.");
       return;
     }
@@ -86,7 +100,9 @@ const Register = () => {
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (
+      formData.password !== formData.confirmPassword
+    ) {
       setError("Passwords do not match.");
       return;
     }
@@ -94,56 +110,36 @@ const Register = () => {
     try {
       setLoading(true);
 
+      // --------------------------------------------------------
+      // Register user through AuthContext
+      // --------------------------------------------------------
       const response = await register({
-        name: formData.name.trim(),
+        first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
-        email: formData.email.trim(),
+        email: formData.email.trim().toLowerCase(),
         phone: formData.phone.trim(),
         password: formData.password,
       });
 
-      /*
-       * If the backend automatically logs the user in,
-       * it should return something like:
-       *
-       * {
-       *   token: "...",
-       *   user: {
-       *     id: 1,
-       *     name: "...",
-       *     last_name: "...",
-       *     email: "..."
-       *   }
-       * }
-       */
-
       const data = response.data;
 
-      if (data.token) {
-        const user = data.user || data;
+      // --------------------------------------------------------
+      // Redirect based on authentication response
+      // --------------------------------------------------------
+      if (data.token && data.user) {
+        navigate(redirectPath, {
+          replace: true,
+        });
 
-        localStorage.setItem(
-          "fernwood_user",
-          JSON.stringify({
-            token: data.token,
-            user,
-          })
-        );
-
-        window.dispatchEvent(new Event("fernwood:auth-updated"));
-
-        navigate(redirectPath, { replace: true });
         return;
       }
 
-      /*
-       * If registration succeeds but the backend does not
-       * return a JWT, send the customer to login.
-       */
+      // Registration succeeded without automatic login.
       navigate("/login", {
         replace: true,
         state: {
-          message: "Account created successfully. Please sign in.",
+          message:
+            "Account created successfully. Please sign in.",
         },
       });
     } catch (err) {
@@ -158,6 +154,9 @@ const Register = () => {
     }
   };
 
+  // ============================================================
+  // RENDER
+  // ============================================================
   return (
     <div className="min-h-screen bg-[#F8F5EF]">
       <PageHero
@@ -169,6 +168,7 @@ const Register = () => {
 
       <div className="flex min-h-screen items-center justify-center px-4 py-12">
         <div className="w-full max-w-lg">
+
           {/* Brand */}
           <div className="mb-8 text-center">
             <Link
@@ -185,6 +185,7 @@ const Register = () => {
 
           {/* Register Card */}
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+
             <div className="mb-6">
               <h1 className="text-2xl font-semibold text-[#031008]">
                 Create an account
@@ -201,14 +202,19 @@ const Register = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Name */}
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5"
+            >
+
+              {/* First Name and Last Name */}
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
                 <Input
                   label="First name"
-                  name="name"
+                  name="first_name"
                   type="text"
-                  value={formData.name}
+                  value={formData.first_name}
                   placeholder="First name"
                   onChange={handleChange}
                   autoComplete="given-name"
@@ -227,6 +233,7 @@ const Register = () => {
                   required
                   disabled={loading}
                 />
+
               </div>
 
               {/* Email */}
@@ -281,16 +288,18 @@ const Register = () => {
                 disabled={loading}
               />
 
-              {/* Register */}
+              {/* Register Button */}
               <Button
                 type="submit"
                 variant="primary"
                 size="large"
                 fullWidth
                 loading={loading}
+                disabled={loading}
               >
                 Create account
               </Button>
+
             </form>
 
             {/* Login */}
@@ -305,9 +314,10 @@ const Register = () => {
                 </Link>
               </p>
             </div>
+
           </div>
 
-          {/* Back to store */}
+          {/* Back to Store */}
           <div className="mt-6 text-center">
             <Link
               to="/"
@@ -316,6 +326,7 @@ const Register = () => {
               ← Back to store
             </Link>
           </div>
+
         </div>
       </div>
     </div>

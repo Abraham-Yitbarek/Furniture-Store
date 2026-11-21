@@ -9,7 +9,7 @@ import api from "./api";
 | Backend route:
 |   /api/auth
 |
-| These functions are used by:
+| Used by:
 |   Login.jsx
 |   Register.jsx
 |   Profile.jsx
@@ -17,153 +17,89 @@ import api from "./api";
 |--------------------------------------------------------------------------
 */
 
-/*
-|--------------------------------------------------------------------------
-| Login
-|--------------------------------------------------------------------------
-| Authenticates an existing customer.
-|
-| POST /api/auth/login
-|
-| Expected data:
-| {
-|   email: "customer@example.com",
-|   password: "password123"
-| }
-|
-| Expected response:
-| {
-|   token: "...",
-|   user: { ... }
-| }
-|--------------------------------------------------------------------------
-*/
+// ============================================================
+// LOGIN
+// POST /api/auth/login
+// ============================================================
 
 export const login = (data) => {
   return api.post("/auth/login", data);
 };
 
-/*
-|--------------------------------------------------------------------------
-| Register
-|--------------------------------------------------------------------------
-| Creates a new customer account.
-|
-| POST /api/auth/register
-|
-| Example data:
-| {
-|   first_name: "Abraham",
-|   last_name: "Yitbarek",
-|   email: "customer@example.com",
-|   phone: "+251900000000",
-|   password: "password123"
-| }
-|--------------------------------------------------------------------------
-*/
+// ============================================================
+// REGISTER
+// POST /api/auth/register
+// ============================================================
 
-export const register = (data) => api.post("/auth/register", data);
+export const register = (data) => {
+  return api.post("/auth/register", data);
+};
 
-/*
-|--------------------------------------------------------------------------
-| Change Password
-|--------------------------------------------------------------------------
-| Changes the password of the currently authenticated customer.
-|
-| PUT /api/auth/change-password
-|
-| Example data:
-| {
-|   current_password: "oldPassword",
-|   new_password: "newPassword"
-| }
-|--------------------------------------------------------------------------
-*/
+// ============================================================
+// GET PROFILE
+// GET /api/auth/profile
+// Protected route
+// ============================================================
+
+export const getProfile = () => {
+  return api.get("/auth/profile");
+};
+
+// ============================================================
+// UPDATE PROFILE
+// PUT /api/auth/profile
+// Protected route
+// ============================================================
+
+export const updateProfile = (data) => {
+  return api.put("/auth/profile", data);
+};
+
+// ============================================================
+// CHANGE PASSWORD
+// PUT /api/auth/change-password
+// Protected route
+// ============================================================
 
 export const changePassword = (data) => {
   return api.put("/auth/change-password", data);
 };
 
-/*
-|--------------------------------------------------------------------------
-| Logout
-|--------------------------------------------------------------------------
-| Logout is primarily handled on the frontend by removing the
-| stored authentication information.
-|
-| The backend does not necessarily need a logout request when
-| using stateless JWT authentication.
-|--------------------------------------------------------------------------
-*/
+// ============================================================
+// LOGOUT
+// POST /api/auth/logout
+// ============================================================
 
 export const logout = () => {
   localStorage.removeItem("fernwood_user");
 
-  window.dispatchEvent(new Event("fernwood:auth-updated"));
+  window.dispatchEvent(
+    new Event("fernwood:auth-updated")
+  );
 };
 
-/*
-|--------------------------------------------------------------------------
-| Forgot Password
-|--------------------------------------------------------------------------
-| Sends a password-reset request.
-|
-| POST /api/auth/forgot-password
-|
-| Example data:
-| {
-|   email: "customer@example.com"
-| }
-|
-| Only use this function after the corresponding backend route
-| has been implemented.
-|--------------------------------------------------------------------------
-*/
+// ============================================================
+// FORGOT PASSWORD
+// POST /api/auth/forgot-password
+// ============================================================
 
 export const forgotPassword = (data) => {
   return api.post("/auth/forgot-password", data);
 };
 
-/*
-|--------------------------------------------------------------------------
-| Reset Password
-|--------------------------------------------------------------------------
-| Resets a customer's password using a reset token.
-|
-| POST /api/auth/reset-password
-|
-| Example data:
-| {
-|   token: "reset-token",
-|   password: "newPassword"
-| }
-|
-| Only use this function after the corresponding backend route
-| has been implemented.
-|--------------------------------------------------------------------------
-*/
+// ============================================================
+// RESET PASSWORD
+// POST /api/auth/reset-password
+// ============================================================
 
 export const resetPassword = (data) => {
   return api.post("/auth/reset-password", data);
 };
 
-/*
-|--------------------------------------------------------------------------
-| Verify Email
-|--------------------------------------------------------------------------
-| Verifies a customer's email address.
-|
-| POST /api/auth/verify-email
-|
-| Example data:
-| {
-|   token: "verification-token"
-| }
-|
-| Only use this function after the corresponding backend route
-| has been implemented.
-|--------------------------------------------------------------------------
-*/
+// ============================================================
+// VERIFY EMAIL
+// POST /api/auth/verify-email
+// ============================================================
 
 export const verifyEmail = (data) => {
   return api.post("/auth/verify-email", data);

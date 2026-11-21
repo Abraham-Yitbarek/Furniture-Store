@@ -1,19 +1,41 @@
+
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  // Get logged-in user
-  const storedUser = localStorage.getItem("fernwood_user");
-  const authData = storedUser ? JSON.parse(storedUser) : null;
-  const user = authData?.user || null;
+  // ============================================================
+  // USER INFORMATION
+  // ============================================================
+
+  const firstName =
+    user?.first_name ||
+    user?.name?.trim().split(/\s+/)[0] ||
+    "";
+
+  const displayName =
+    [user?.first_name, user?.last_name].filter(Boolean).join(" ") ||
+    user?.name ||
+    "Account";
+
+  const avatarInitial =
+    firstName.charAt(0).toUpperCase() || "U";
+
+  const profilePicture = user?.profile_picture;
+
   // Example cart count.
   // Later this will come from CartContext.
   const cartCount = 0;
+
+  // ============================================================
+  // SEARCH
+  // ============================================================
 
   const handleSearch = (event) => {
     event.preventDefault();
@@ -23,16 +45,24 @@ const Navbar = () => {
     if (!value) return;
 
     navigate(`/products?search=${encodeURIComponent(value)}`);
+
     setSearch("");
+    setIsMenuOpen(false);
   };
+
+  // ============================================================
+  // LOGOUT
+  // ============================================================
 
   const handleLogout = () => {
-    localStorage.removeItem("fernwood_user");
-
+    logout();
+    setIsMenuOpen(false);
     navigate("/login");
-
-    window.location.reload();
   };
+
+  // ============================================================
+  // NAVIGATION LINK STYLES
+  // ============================================================
 
   const navLinkClass = ({ isActive }) =>
     `
@@ -47,14 +77,48 @@ const Navbar = () => {
       }
     `;
 
+  // ============================================================
+  // AVATAR
+  // ============================================================
+
+  const Avatar = ({ size = "h-8 w-8" }) => (
+    <span
+      className={`
+        ${size}
+        flex
+        shrink-0
+        items-center
+        justify-center
+        overflow-hidden
+        rounded-full
+        bg-[#031008]
+        text-sm
+        font-medium
+        text-white
+      `}
+    >
+      {profilePicture ? (
+        <img
+          src={profilePicture}
+          alt={`${displayName}'s profile`}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        avatarInitial
+      )}
+    </span>
+  );
+
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
         <div className="flex h-16 items-center justify-between gap-6">
 
           {/* =========================
               LOGO
           ========================== */}
+
           <Link
             to="/"
             className="shrink-0 text-xl font-bold tracking-wide text-[#031008]"
@@ -65,6 +129,7 @@ const Navbar = () => {
           {/* =========================
               DESKTOP NAVIGATION
           ========================== */}
+
           <nav className="hidden items-center gap-6 lg:flex">
             <NavLink to="/" className={navLinkClass}>
               Home
@@ -82,9 +147,10 @@ const Navbar = () => {
           {/* =========================
               SEARCH
           ========================== */}
+
           <form
             onSubmit={handleSearch}
-            className="hidden flex-1 max-w-md md:block"
+            className="hidden max-w-md flex-1 md:block"
           >
             <div className="relative">
               <input
@@ -149,9 +215,11 @@ const Navbar = () => {
           {/* =========================
               RIGHT SIDE
           ========================== */}
+
           <div className="hidden items-center gap-4 sm:flex">
 
             {/* Wishlist */}
+
             <Link
               to="/wishlist"
               className="relative text-[#031008] hover:text-[#33473B]"
@@ -174,6 +242,7 @@ const Navbar = () => {
             </Link>
 
             {/* Cart */}
+
             <Link
               to="/cart"
               className="relative text-[#031008] hover:text-[#33473B]"
@@ -223,8 +292,12 @@ const Navbar = () => {
             {/* =========================
                 AUTHENTICATION
             ========================== */}
+
             {user ? (
               <div className="group relative">
+
+                {/* User Button */}
+
                 <button
                   type="button"
                   className="
@@ -240,12 +313,10 @@ const Navbar = () => {
                     hover:bg-gray-100
                   "
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#031008] text-sm text-white">
-                    {user.name?.charAt(0).toUpperCase() || "U"}
-                  </span>
+                  <Avatar />
 
                   <span className="hidden xl:block">
-                    {user.name || "Account"}
+                    {displayName}
                   </span>
 
                   <svg
@@ -265,6 +336,7 @@ const Navbar = () => {
                 </button>
 
                 {/* Dropdown */}
+
                 <div
                   className="
                     invisible
@@ -336,6 +408,7 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center gap-3">
+
                 <Link
                   to="/login"
                   className="
@@ -364,6 +437,7 @@ const Navbar = () => {
                 >
                   Register
                 </Link>
+
               </div>
             )}
           </div>
@@ -371,6 +445,7 @@ const Navbar = () => {
           {/* =========================
               MOBILE MENU BUTTON
           ========================== */}
+
           <button
             type="button"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -421,10 +496,12 @@ const Navbar = () => {
         {/* =========================
             MOBILE MENU
         ========================== */}
+
         {isMenuOpen && (
           <div className="border-t border-gray-200 py-4 sm:hidden">
 
             {/* Mobile search */}
+
             <form
               onSubmit={handleSearch}
               className="mb-4"
@@ -452,8 +529,28 @@ const Navbar = () => {
               />
             </form>
 
+            {/* Mobile user information */}
+
+            {user && (
+              <div className="mb-3 flex items-center gap-3 border-b border-gray-200 px-3 pb-4">
+                <Avatar size="h-10 w-10" />
+
+                <div>
+                  <p className="text-sm font-semibold text-[#031008]">
+                    {displayName}
+                  </p>
+
+                  <p className="text-xs text-gray-500">
+                    My Account
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Mobile navigation */}
+
             <nav className="flex flex-col gap-1">
+
               <Link
                 to="/"
                 onClick={() => setIsMenuOpen(false)}
