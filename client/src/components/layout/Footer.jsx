@@ -1,55 +1,35 @@
-import { Link } from "react-router-dom";
-
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-[#031008] text-white">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 pt-16 pb-8 sm:px-8 lg:px-10">
 
-        {/* =========================
-            MAIN FOOTER
-        ========================== */}
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Main Footer */}
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-3">
 
-          {/* =========================
-              COMPANY
-          ========================== */}
+          {/* Brand */}
           <div>
-            <Link
-              to="/"
-              className="text-2xl font-bold tracking-wide"
+            <a
+              href="/"
+              className="inline-block text-3xl font-bold tracking-wider"
             >
-              Fernwood
-            </Link>
+              Fernwood<span className="text-[#A3B18A]">.</span>
+            </a>
 
-            <p className="mt-4 max-w-xs text-sm leading-6 text-gray-300">
-              Quality furniture designed to make your
-              home comfortable, beautiful, and unique.
+            <p className="mt-5 max-w-sm text-sm leading-7 text-gray-400">
+              Thoughtfully designed furniture that brings comfort,
+              elegance, and character into every living space.
             </p>
 
             {/* Social Media */}
-            <div className="mt-6 flex items-center gap-3">
-
+            <div className="mt-7 flex items-center gap-3">
               <a
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
-                className="
-                  flex
-                  h-9
-                  w-9
-                  items-center
-                  justify-center
-                  rounded-full
-                  border
-                  border-gray-600
-                  text-gray-300
-                  transition
-                  hover:border-white
-                  hover:text-white
-                "
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-sm font-semibold text-gray-300 transition hover:border-[#A3B18A] hover:bg-[#A3B18A] hover:text-[#031008]"
               >
                 f
               </a>
@@ -59,20 +39,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="
-                  flex
-                  h-9
-                  w-9
-                  items-center
-                  justify-center
-                  rounded-full
-                  border
-                  border-gray-600
-                  text-gray-300
-                  transition
-                  hover:border-white
-                  hover:text-white
-                "
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-lg text-gray-300 transition hover:border-[#A3B18A] hover:bg-[#A3B18A] hover:text-[#031008]"
               >
                 ◎
               </a>
@@ -81,158 +48,49 @@ const Footer = () => {
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Twitter"
-                className="
-                  flex
-                  h-9
-                  w-9
-                  items-center
-                  justify-center
-                  rounded-full
-                  border
-                  border-gray-600
-                  text-gray-300
-                  transition
-                  hover:border-white
-                  hover:text-white
-                "
+                aria-label="X"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-sm font-semibold text-gray-300 transition hover:border-[#A3B18A] hover:bg-[#A3B18A] hover:text-[#031008]"
               >
                 𝕏
               </a>
             </div>
           </div>
 
-          {/* =========================
-              USEFUL LINKS
-          ========================== */}
+          {/* Customer Support */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider">
-              Quick Links
+            <h3 className="text-sm font-semibold uppercase tracking-[0.15em] text-white">
+              Customer Support
             </h3>
 
-            <ul className="mt-5 space-y-3">
-              <li>
-                <Link
-                  to="/"
-                  className="text-sm text-gray-300 transition hover:text-white"
-                >
-                  Home
-                </Link>
-              </li>
+            <p className="mt-5 max-w-xs text-sm leading-7 text-gray-400">
+              Have a question or need assistance? We're here to help
+              you find the right furniture for your space.
+            </p>
 
-              <li>
-                <Link
-                  to="/products"
-                  className="text-sm text-gray-300 transition hover:text-white"
-                >
-                  Products
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  to="/categories"
-                  className="text-sm text-gray-300 transition hover:text-white"
-                >
-                  Categories
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  to="/wishlist"
-                  className="text-sm text-gray-300 transition hover:text-white"
-                >
-                  Wishlist
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  to="/cart"
-                  className="text-sm text-gray-300 transition hover:text-white"
-                >
-                  Cart
-                </Link>
-              </li>
-            </ul>
+            <a
+              href="mailto:info@fernwood.com"
+              className="mt-5 inline-block text-sm text-[#A3B18A] transition hover:text-white"
+            >
+              Get in touch →
+            </a>
           </div>
 
-          {/* =========================
-              CATEGORIES
-          ========================== */}
+          {/* Contact Information */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider">
-              Categories
+            <h3 className="text-sm font-semibold uppercase tracking-[0.15em] text-white">
+              Contact Information
             </h3>
 
-            <ul className="mt-5 space-y-3">
-              <li>
-                <Link
-                  to="/products?category=sofas"
-                  className="text-sm text-gray-300 transition hover:text-white"
-                >
-                  Sofas
-                </Link>
-              </li>
+            <ul className="mt-5 space-y-5">
 
-              <li>
-                <Link
-                  to="/products?category=chairs"
-                  className="text-sm text-gray-300 transition hover:text-white"
-                >
-                  Chairs
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  to="/products?category=tables"
-                  className="text-sm text-gray-300 transition hover:text-white"
-                >
-                  Tables
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  to="/products?category=beds"
-                  className="text-sm text-gray-300 transition hover:text-white"
-                >
-                  Beds
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  to="/products?category=storage"
-                  className="text-sm text-gray-300 transition hover:text-white"
-                >
-                  Storage
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* =========================
-              CONTACT
-          ========================== */}
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider">
-              Contact Us
-            </h3>
-
-            <ul className="mt-5 space-y-4">
-
-              {/* Email */}
               <li className="flex items-start gap-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  strokeWidth={1.8}
+                  strokeWidth={1.6}
                   stroke="currentColor"
-                  className="mt-0.5 h-5 w-5 shrink-0 text-gray-400"
+                  className="mt-0.5 h-5 w-5 shrink-0 text-[#A3B18A]"
                 >
                   <path
                     strokeLinecap="round"
@@ -243,21 +101,20 @@ const Footer = () => {
 
                 <a
                   href="mailto:info@fernwood.com"
-                  className="text-sm text-gray-300 transition hover:text-white"
+                  className="text-sm text-gray-400 transition hover:text-white"
                 >
                   info@fernwood.com
                 </a>
               </li>
 
-              {/* Phone */}
               <li className="flex items-start gap-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  strokeWidth={1.8}
+                  strokeWidth={1.6}
                   stroke="currentColor"
-                  className="mt-0.5 h-5 w-5 shrink-0 text-gray-400"
+                  className="mt-0.5 h-5 w-5 shrink-0 text-[#A3B18A]"
                 >
                   <path
                     strokeLinecap="round"
@@ -268,21 +125,20 @@ const Footer = () => {
 
                 <a
                   href="tel:+251900000000"
-                  className="text-sm text-gray-300 transition hover:text-white"
+                  className="text-sm text-gray-400 transition hover:text-white"
                 >
                   +251 900 000 000
                 </a>
               </li>
 
-              {/* Address */}
               <li className="flex items-start gap-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  strokeWidth={1.8}
+                  strokeWidth={1.6}
                   stroke="currentColor"
-                  className="mt-0.5 h-5 w-5 shrink-0 text-gray-400"
+                  className="mt-0.5 h-5 w-5 shrink-0 text-[#A3B18A]"
                 >
                   <path
                     strokeLinecap="round"
@@ -296,7 +152,7 @@ const Footer = () => {
                   />
                 </svg>
 
-                <span className="text-sm leading-6 text-gray-300">
+                <span className="text-sm leading-6 text-gray-400">
                   Addis Ababa, Ethiopia
                 </span>
               </li>
@@ -304,35 +160,32 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* =========================
-            DIVIDER
-        ========================== */}
-        <div className="my-10 border-t border-gray-700" />
+        {/* Divider */}
+        <div className="my-12 border-t border-white/10" />
 
-        {/* =========================
-            BOTTOM
-        ========================== */}
-        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+        {/* Bottom Footer */}
+        <div className="flex flex-col items-center justify-between gap-5 sm:flex-row">
 
-          <p className="text-sm text-gray-400">
+          <p className="text-center text-xs text-gray-500 sm:text-left">
             © {currentYear} Fernwood Furniture. All rights reserved.
           </p>
 
-          <div className="flex items-center gap-5">
-            <Link
-              to="/privacy"
-              className="text-sm text-gray-400 transition hover:text-white"
+          <div className="flex items-center gap-6">
+            <a
+              href="/privacy"
+              className="text-xs text-gray-500 transition hover:text-white"
             >
               Privacy Policy
-            </Link>
+            </a>
 
-            <Link
-              to="/terms"
-              className="text-sm text-gray-400 transition hover:text-white"
+            <a
+              href="/terms"
+              className="text-xs text-gray-500 transition hover:text-white"
             >
               Terms & Conditions
-            </Link>
+            </a>
           </div>
+
         </div>
       </div>
     </footer>
