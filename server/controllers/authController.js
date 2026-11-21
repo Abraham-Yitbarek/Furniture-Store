@@ -37,18 +37,21 @@ const sanitizeUser = (user) => {
 export const registerUser = async (req, res) => {
   try {
     const {
-      name,
+      first_name,
+      last_name,
       email,
       password,
+      profile_picture,
     } = req.body;
 
     // --------------------------------------------------------
     // Validation
     // --------------------------------------------------------
-    if (!name || !email || !password) {
+    if (!first_name || !last_name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Name, email and password are required",
+        message:
+          "First name, last name, email and password are required",
       });
     }
 
@@ -59,7 +62,16 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    const normalizedFirstName = first_name.trim();
+    const normalizedLastName = last_name.trim();
     const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedFirstName || !normalizedLastName) {
+      return res.status(400).json({
+        success: false,
+        message: "First name and last name cannot be empty",
+      });
+    }
 
     // --------------------------------------------------------
     // Check existing user
@@ -82,10 +94,13 @@ export const registerUser = async (req, res) => {
     // Create user
     // --------------------------------------------------------
     const user = await User.create({
-      name: name.trim(),
+      first_name: normalizedFirstName,
+      last_name: normalizedLastName,
       email: normalizedEmail,
+      address: { phone: req.body.phone,},
       password: hashedPassword,
-      is_admin: false,
+      profile_picture: profile_picture || null,
+      isAdmin: false,
     });
 
     if (!user) {
@@ -252,31 +267,91 @@ export const updateProfile = async (req, res) => {
     }
 
     const {
-      name,
+      first_name,
+      last_name,
       email,
+      profile_picture,
+      phone,
+      address,
     } = req.body;
 
     // --------------------------------------------------------
     // Validate
     // --------------------------------------------------------
-    if (!name && !email) {
+    if (
+      first_name === undefined &&
+      last_name === undefined &&
+      email === undefined &&
+      profile_picture === undefined &&
+      phone === undefined &&
+      address === undefined
+    ) {
       return res.status(400).json({
         success: false,
         message: "At least one field is required",
       });
     }
 
-    const normalizedEmail = email
-      ? email.trim().toLowerCase()
-      : undefined;
+    const normalizedEmail =
+      email !== undefined
+        ? email.trim().toLowerCase()
+        : undefined;
+
+    const normalizedFirstName =
+      first_name !== undefined
+        ? first_name.trim()
+        : undefined;
+
+    const normalizedLastName =
+      last_name !== undefined
+        ? last_name.trim()
+        : undefined;
+
+    // --------------------------------------------------------
+    // Validate names if provided
+    // --------------------------------------------------------
+    if (
+      first_name !== undefined &&
+      !normalizedFirstName
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "First name cannot be empty",
+      });
+    }
+
+    if (
+      last_name !== undefined &&
+      !normalizedLastName
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Last name cannot be empty",
+      });
+    }
+
+    // --------------------------------------------------------
+    // Validate email if provided
+    // --------------------------------------------------------
+    if (email !== undefined && !normalizedEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Email cannot be empty",
+      });
+    }
 
     // --------------------------------------------------------
     // If changing email, check whether already used
     // --------------------------------------------------------
     if (normalizedEmail) {
-      const existingUser = await User.findByEmail(normalizedEmail);
+      const existingUser = await User.findByEmail(
+        normalizedEmail
+      );
 
-      if (existingUser && Number(existingUser.id) !== Number(userId)) {
+      if (
+        existingUser &&
+        Number(existingUser.id) !== Number(userId)
+      ) {
         return res.status(409).json({
           success: false,
           message: "Email is already in use",
@@ -288,8 +363,18 @@ export const updateProfile = async (req, res) => {
     // Update user
     // --------------------------------------------------------
     const updatedUser = await User.update(userId, {
-      name: name?.trim(),
+      first_name: normalizedFirstName,
+      last_name: normalizedLastName,
       email: normalizedEmail,
+      profile_picture:
+        profile_picture !== undefined
+          ? profile_picture
+          : undefined,
+      phone:
+        phone !== undefined
+          ? phone.trim()
+          : undefined,
+      address,
     });
 
     if (!updatedUser) {
@@ -348,21 +433,23 @@ export const changePassword = async (req, res) => {
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
         success: false,
-        message: "Current password and new password are required",
+        message:
+          "Current password and new password are required",
       });
     }
 
     if (newPassword.length < 6) {
       return res.status(400).json({
         success: false,
-        message: "New password must be at least 6 characters",
+        message:
+          "New password must be at least 6 characters",
       });
     }
 
     // --------------------------------------------------------
     // Get user
     // --------------------------------------------------------
-    const user = await User.findById(userId);
+    const user = await User.findByIdWithPassword(userId);
 
     if (!user) {
       return res.status(404).json({

@@ -1,9 +1,7 @@
-// models/Address.js
 
 import pool from "../config/db.js";
 
 const Address = {
-
   // ==========================================
   // CREATE ADDRESS
   // ==========================================
@@ -12,7 +10,7 @@ const Address = {
     userId,
     label = "Home",
     fullName,
-    phone,
+    phone = null,
     line1,
     line2 = null,
     city,
@@ -20,7 +18,7 @@ const Address = {
     postalCode = null,
     country,
     isDefault = false,
-    isActive = true
+    isActive = true,
   }) {
     const query = `
       INSERT INTO addresses (
@@ -57,14 +55,13 @@ const Address = {
       postalCode,
       country,
       isDefault,
-      isActive
+      isActive,
     ];
 
     const { rows } = await pool.query(query, values);
 
     return rows[0];
   },
-
 
   // ==========================================
   // FIND ADDRESS BY ID
@@ -81,7 +78,6 @@ const Address = {
 
     return rows[0] || null;
   },
-
 
   // ==========================================
   // FIND ALL ADDRESSES FOR USER
@@ -100,7 +96,6 @@ const Address = {
 
     return rows;
   },
-
 
   // ==========================================
   // FIND DEFAULT ADDRESS
@@ -121,24 +116,26 @@ const Address = {
     return rows[0] || null;
   },
 
-
   // ==========================================
   // UPDATE ADDRESS
   // ==========================================
 
-  async update(id, {
-    label,
-    fullName,
-    phone,
-    line1,
-    line2,
-    city,
-    region,
-    postalCode,
-    country,
-    isDefault,
-    isActive
-  }) {
+  async update(
+    id,
+    {
+      label,
+      fullName,
+      phone,
+      line1,
+      line2,
+      city,
+      region,
+      postalCode,
+      country,
+      isDefault,
+      isActive,
+    }
+  ) {
     const query = `
       UPDATE addresses
       SET
@@ -146,15 +143,24 @@ const Address = {
         full_name = COALESCE($2, full_name),
         phone = COALESCE($3, phone),
         line1 = COALESCE($4, line1),
-        line2 = COALESCE($5, line2),
-        city = COALESCE($6, city),
-        region = COALESCE($7, region),
-        postal_code = COALESCE($8, postal_code),
-        country = COALESCE($9, country),
-        is_default = COALESCE($10, is_default),
-        is_active = COALESCE($11, is_active),
+        line2 = CASE
+          WHEN $5::boolean THEN $6
+          ELSE line2
+        END,
+        city = COALESCE($7, city),
+        region = CASE
+          WHEN $8::boolean THEN $9
+          ELSE region
+        END,
+        postal_code = CASE
+          WHEN $10::boolean THEN $11
+          ELSE postal_code
+        END,
+        country = COALESCE($12, country),
+        is_default = COALESCE($13, is_default),
+        is_active = COALESCE($14, is_active),
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $12
+      WHERE id = $15
       RETURNING *
     `;
 
@@ -163,14 +169,17 @@ const Address = {
       fullName ?? null,
       phone ?? null,
       line1 ?? null,
+      line2 !== undefined,
       line2 ?? null,
       city ?? null,
+      region !== undefined,
       region ?? null,
+      postalCode !== undefined,
       postalCode ?? null,
       country ?? null,
       isDefault ?? null,
       isActive ?? null,
-      id
+      id,
     ];
 
     const { rows } = await pool.query(query, values);
@@ -178,43 +187,70 @@ const Address = {
     return rows[0] || null;
   },
 
-
   // ==========================================
   // SET DEFAULT ADDRESS
   // ==========================================
 
   async setDefault(userId, addressId) {
+    const client = await pool.connect();
 
-    await pool.query(
-      `
-        UPDATE addresses
-        SET
-          is_default = FALSE,
-          updated_at = CURRENT_TIMESTAMP
-        WHERE user_id = $1
-      `,
-      [userId]
-    );
+    try {
+      await client.query("BEGIN");
 
-    const query = `
-      UPDATE addresses
-      SET
-        is_default = TRUE,
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $1
-        AND user_id = $2
-        AND is_active = TRUE
-      RETURNING *
-    `;
+      // Verify that the address belongs to the user
+      // and is active before changing defaults.
+      const addressResult = await client.query(
+        `
+          SELECT id
+          FROM addresses
+          WHERE id = $1
+            AND user_id = $2
+            AND is_active = TRUE
+          FOR UPDATE
+        `,
+        [addressId, userId]
+      );
 
-    const { rows } = await pool.query(
-      query,
-      [addressId, userId]
-    );
+      if (!addressResult.rows.length) {
+        await client.query("ROLLBACK");
+        return null;
+      }
 
-    return rows[0] || null;
+      await client.query(
+        `
+          UPDATE addresses
+          SET
+            is_default = FALSE,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE user_id = $1
+        `,
+        [userId]
+      );
+
+      const { rows } = await client.query(
+        `
+          UPDATE addresses
+          SET
+            is_default = TRUE,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = $1
+            AND user_id = $2
+            AND is_active = TRUE
+          RETURNING *
+        `,
+        [addressId, userId]
+      );
+
+      await client.query("COMMIT");
+
+      return rows[0] || null;
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
   },
-
 
   // ==========================================
   // DELETE ADDRESS
@@ -230,8 +266,7 @@ const Address = {
     const { rows } = await pool.query(query, [id]);
 
     return rows[0] || null;
-  }
-
+  },
 };
 
 export default Address;

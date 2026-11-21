@@ -3,20 +3,24 @@ import bcrypt from "bcryptjs";
 
 const User = {
   // ============================================================
-  // Create a new user
+  // CREATE USER
   // ============================================================
   async create({
-    name,
+    first_name,
+    last_name,
     email,
     password,
     isAdmin = false,
+    profile_picture = null,
     address = {},
   }) {
     const query = `
       INSERT INTO users (
-        name,
+        first_name,
+        last_name,
         email,
         password,
+        profile_picture,
         is_admin,
         address_full_name,
         address_line1,
@@ -28,13 +32,15 @@ const User = {
         address_phone
       )
       VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8,
-        $9, $10, $11, $12
+        $1, $2, $3, $4, $5, $6, $7,
+        $8, $9, $10, $11, $12, $13, $14
       )
       RETURNING
         id,
-        name,
+        first_name,
+        last_name,
         email,
+        profile_picture,
         is_admin,
         address_full_name,
         address_line1,
@@ -49,10 +55,13 @@ const User = {
     `;
 
     const values = [
-      name.trim(),
+      first_name.trim(),
+      last_name.trim(),
       email.toLowerCase().trim(),
       password,
+      profile_picture,
       isAdmin,
+
       address.fullName || null,
       address.line1 || null,
       address.line2 || null,
@@ -69,14 +78,16 @@ const User = {
   },
 
   // ============================================================
-  // Find user by ID
+  // FIND USER BY ID
   // ============================================================
   async findById(id) {
     const query = `
       SELECT
         id,
-        name,
+        first_name,
+        last_name,
         email,
+        profile_picture,
         is_admin,
         address_full_name,
         address_line1,
@@ -98,7 +109,7 @@ const User = {
   },
 
   // ============================================================
-  // Find user by ID including password
+  // FIND USER BY ID WITH PASSWORD
   // ============================================================
   async findByIdWithPassword(id) {
     const query = `
@@ -113,8 +124,7 @@ const User = {
   },
 
   // ============================================================
-  // Find user by email
-  // Includes password for login
+  // FIND USER BY EMAIL
   // ============================================================
   async findByEmail(email) {
     const query = `
@@ -131,7 +141,7 @@ const User = {
   },
 
   // ============================================================
-  // Check password
+  // MATCH PASSWORD
   // ============================================================
   async matchPassword(user, enteredPassword) {
     return bcrypt.compare(
@@ -141,53 +151,60 @@ const User = {
   },
 
   // ============================================================
-  // Update user
+  // UPDATE USER PROFILE
   // ============================================================
   async update(id, data) {
     const {
-      name,
+      first_name,
+      last_name,
       email,
+      phone,
+      profile_picture,
       address,
     } = data;
 
     const query = `
       UPDATE users
       SET
-        name = COALESCE($1, name),
-        email = COALESCE($2, email),
+        first_name = COALESCE($1, first_name),
+        last_name = COALESCE($2, last_name),
+        email = COALESCE($3, email),
+        profile_picture = COALESCE($4, profile_picture),
 
         address_full_name =
-          COALESCE($3, address_full_name),
+          COALESCE($5, address_full_name),
 
         address_line1 =
-          COALESCE($4, address_line1),
+          COALESCE($6, address_line1),
 
         address_line2 =
-          COALESCE($5, address_line2),
+          COALESCE($7, address_line2),
 
         address_city =
-          COALESCE($6, address_city),
+          COALESCE($8, address_city),
 
         address_region =
-          COALESCE($7, address_region),
+          COALESCE($9, address_region),
 
         address_postal_code =
-          COALESCE($8, address_postal_code),
+          COALESCE($10, address_postal_code),
 
         address_country =
-          COALESCE($9, address_country),
+          COALESCE($11, address_country),
 
         address_phone =
-          COALESCE($10, address_phone),
+          COALESCE($12, address_phone),
 
         updated_at = CURRENT_TIMESTAMP
 
-      WHERE id = $11
+      WHERE id = $13
 
       RETURNING
         id,
-        name,
+        first_name,
+        last_name,
         email,
+        profile_picture,
         is_admin,
         address_full_name,
         address_line1,
@@ -202,8 +219,10 @@ const User = {
     `;
 
     const values = [
-      name?.trim() || null,
-      email?.toLowerCase().trim() || null,
+      first_name?.trim() || null,
+      last_name?.trim() || null,
+      email?.trim().toLowerCase() || null,
+      profile_picture || null,
 
       address?.fullName || null,
       address?.line1 || null,
@@ -212,7 +231,8 @@ const User = {
       address?.region || null,
       address?.postalCode || null,
       address?.country || null,
-      address?.phone || null,
+
+      phone?.trim() || address?.phone || null,
 
       id,
     ];
@@ -223,14 +243,9 @@ const User = {
   },
 
   // ============================================================
-  // Update password
+  // UPDATE PASSWORD
   // ============================================================
-  async updatePassword(id, password) {
-    const hashedPassword = await bcrypt.hash(
-      password,
-      10
-    );
-
+  async updatePassword(id, hashedPassword) {
     const query = `
       UPDATE users
       SET
@@ -239,9 +254,19 @@ const User = {
       WHERE id = $2
       RETURNING
         id,
-        name,
+        first_name,
+        last_name,
         email,
+        profile_picture,
         is_admin,
+        address_full_name,
+        address_line1,
+        address_line2,
+        address_city,
+        address_region,
+        address_postal_code,
+        address_country,
+        address_phone,
         created_at,
         updated_at
     `;
